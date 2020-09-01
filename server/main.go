@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"log"
 	"net"
+	"time"
 )
 
 func main() {
@@ -24,14 +25,24 @@ func main() {
 }
 
 func handle(conn net.Conn) {
+	//setting a connection deadline
+	err := conn.SetDeadline(time.Now().Add(10 * time.Second))
+	if err != nil {
+		log.Println("Connection timeout")
+	}
 	//read from the connection
 	scanner := bufio.NewScanner(conn)
 	//returns a bool everytime it scans
+	//fetches and prints each line of the host connection data
 	for scanner.Scan() {
 		ln := scanner.Text()
 		fmt.Println(ln)
+		//write to a connection
+		fmt.Fprintf(conn, "I heard: %s\n", ln)
 	}
 	defer conn.Close()
 
+	//code never gets here initially
+	//code gets her after setting a connection timeout
 	fmt.Println("Now here")
 }
